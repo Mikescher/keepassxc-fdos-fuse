@@ -1,4 +1,4 @@
-package kpxc_ssh_fuse
+package main
 
 import (
 	"fmt"
@@ -24,6 +24,7 @@ func main() {
 		mount.RegisterRawFile("@COMMIT_MODIFIED", []byte(*kxcfuse.CommitModified))
 	}
 	mount.RegisterRawFile("@PID", []byte(fmt.Sprintf("%d", os.Getpid())))
+	mount.RegisterRawFile("@VERSION", []byte(kxcfuse.Version))
 
 	for _, spec := range conf.Spec {
 		mount.RegisterSecretServiceSpec(spec.Filename, spec.IdentKey, spec.IdentVal, spec.Attr)

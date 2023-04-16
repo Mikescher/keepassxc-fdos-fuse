@@ -32,6 +32,11 @@ func ParseArgs(args []string) ProgArgs {
 			PrintHelp("")
 			os.Exit(0)
 
+		} else if strings.ToLower(arg) == "--version" {
+
+			fmt.Println(Version)
+			os.Exit(0)
+
 		} else if strings.ToLower(arg) == "--mount" {
 
 			if i+1 >= len(args) {

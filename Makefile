@@ -1,6 +1,6 @@
 
 build:
-	CGO_ENABLED=0 go build -o _out/kxc-ssh-fuse cmd/kpxc_ssh_fuse/main.go
+	CGO_ENABLED=0 go build -o _out/kpxc-ssh-fuse cmd/kpxc_ssh_fuse/main.go
 
 run: build
 	./_out/dops
