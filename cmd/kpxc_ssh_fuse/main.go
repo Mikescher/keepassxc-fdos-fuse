@@ -1,4 +1,4 @@
-package main
+package kpxc_ssh_fuse
 
 import (
 	"fmt"
