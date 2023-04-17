@@ -37,6 +37,15 @@ func ParseArgs(args []string) ProgArgs {
 			fmt.Println(Version)
 			os.Exit(0)
 
+		} else if strings.ToLower(arg) == "--info" {
+
+			fmt.Printf("Version        := %s\n", Version)
+			fmt.Printf("VCSType        := %s\n", langext.Coalesce(VCSType, "?"))
+			fmt.Printf("CommitHash     := %s\n", langext.Coalesce(CommitHash, "?"))
+			fmt.Printf("CommitTime     := %s\n", langext.Coalesce(CommitTime, "?"))
+			fmt.Printf("CommitModified := %s\n", langext.Coalesce(CommitModified, "?"))
+			os.Exit(0)
+
 		} else if strings.ToLower(arg) == "--mount" {
 
 			if i+1 >= len(args) {
@@ -91,5 +100,8 @@ func PrintHelp(err string) {
 		fmt.Println("")
 	}
 	fmt.Println("Usage: ./kxc-fdos-fuse --mount [dir] --secret [filename] [search-attribute-key] [search-attribute-value] [data-attribute-key]")
+	fmt.Println(" --version")
+	fmt.Println(" --info")
+	fmt.Println(" --help")
 	fmt.Println("")
 }
