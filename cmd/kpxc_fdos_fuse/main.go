@@ -27,7 +27,7 @@ func main() {
 	mount.RegisterRawFile("@VERSION", []byte(kxcfuse.Version))
 
 	for _, spec := range conf.Spec {
-		mount.RegisterSecretServiceSpec(spec.Filename, spec.IdentKey, spec.IdentVal, spec.Attr)
+		mount.RegisterSecretServiceSpec(spec.Filename, spec.IdentKey, spec.IdentVal, spec.Attr, spec.Extra)
 	}
 
 	err := mount.Run()

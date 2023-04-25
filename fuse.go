@@ -107,10 +107,10 @@ func (f *FuseMount) RegisterRawFile(fn string, data []byte) {
 	})
 }
 
-func (f *FuseMount) RegisterSecretServiceSpec(fn string, identkey string, identval string, attr string) {
+func (f *FuseMount) RegisterSecretServiceSpec(fn string, identkey string, identval string, attr string, extra []string) {
 	f.inodeCounter += 1
 
-	log.Info().Msg(fmt.Sprintf("Registered (secret-service) file '%s' (@ %d) -> [[%s :: %s :: %s]]", fn, f.inodeCounter, identkey, identval, attr))
+	log.Info().Msg(fmt.Sprintf("Registered (secret-service) file '%s' (@ %d) -> [[%s :: %s :: %s :: %v]]", fn, f.inodeCounter, identkey, identval, attr, extra))
 
 	f.specs = append(f.specs, specFile{
 		parent:     f,
@@ -119,5 +119,6 @@ func (f *FuseMount) RegisterSecretServiceSpec(fn string, identkey string, identv
 		ssIdentKey: identkey,
 		ssIdentVal: identval,
 		ssAttr:     attr,
+		extraFlags: extra,
 	})
 }

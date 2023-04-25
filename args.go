@@ -12,6 +12,7 @@ type SSSpec struct {
 	IdentKey string
 	IdentVal string
 	Attr     string
+	Extra    []string
 }
 
 type ProgArgs struct {
@@ -59,7 +60,7 @@ func ParseArgs(args []string) ProgArgs {
 
 		} else if strings.ToLower(arg) == "--secret" {
 
-			if i+4 >= len(args) {
+			if i+5 >= len(args) {
 				PrintHelp("Missing values for --secret")
 				os.Exit(1)
 			}
@@ -69,9 +70,10 @@ func ParseArgs(args []string) ProgArgs {
 				IdentKey: args[i+2],
 				IdentVal: args[i+3],
 				Attr:     args[i+4],
+				Extra:    strings.Split(args[i+5], ","),
 			})
 
-			i += 4
+			i += 5
 
 		} else {
 
@@ -99,9 +101,27 @@ func PrintHelp(err string) {
 		fmt.Println(err)
 		fmt.Println("")
 	}
-	fmt.Println("Usage: ./kxc-fdos-fuse --mount [dir] --secret [filename] [search-attribute-key] [search-attribute-value] [data-attribute-key]")
+	fmt.Println("Usage:")
+	fmt.Println("")
+	fmt.Println("Example:")
+	fmt.Println(" ./kxc-fdos-fuse --mount [dir] --secret [...] --secret [...] --secret [...]")
+	fmt.Println("")
+	fmt.Println(" --mount [dir]")
+	fmt.Println("")
+	fmt.Println(" --secret [filename] [search-attribute-key] [search-attribute-value] [data-attribute-key] [extra]")
+	fmt.Println("   // [filename]:                Output filename")
+	fmt.Println("   // [search-attribute-key]:    Keepass/Secret-Service Attribute-Key used for searching the correct entry")
+	fmt.Println("   // [search-attribute-value]:  Keepass/Secret-Service Attribute-Value used for searching the correct entry")
+	fmt.Println("   // [data-attribute-key]:      Keepass/Secret-Service Attribute-Key, which contains the file data")
+	fmt.Println("   // [extra]:                   Extra parameters")
+	fmt.Println("")
 	fmt.Println(" --version")
+	fmt.Println("")
 	fmt.Println(" --info")
+	fmt.Println("")
 	fmt.Println(" --help")
 	fmt.Println("")
+	fmt.Println("Possible [extra] params (comma separated):")
+	fmt.Println("  'base64':  base64-decode attribute value")
+	fmt.Println("  'plain':   directly output attribute value")
 }

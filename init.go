@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 )
 
-var Version = "1.1"
+var Version = "1.2"
 
 var CommitHash *string
 var VCSType *string

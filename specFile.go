@@ -5,10 +5,12 @@ import (
 	"bazil.org/fuse/fs"
 	"bazil.org/fuse/fuseutil"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/godbus/dbus/v5"
 	keyring "github.com/ppacher/go-dbus-keyring"
 	"github.com/rs/zerolog/log"
+	"strings"
 	"syscall"
 )
 
@@ -19,6 +21,7 @@ type specFile struct {
 	ssIdentKey string
 	ssIdentVal string
 	ssAttr     string
+	extraFlags []string
 }
 
 func (f *specFile) Attr(ctx context.Context, attr *fuse.Attr) error {
@@ -107,6 +110,7 @@ func (f *specFile) Read(ctx context.Context, req *fuse.ReadRequest, resp *fuse.R
 
 		sec, err := item.GetSecret(session.Path())
 		if err != nil {
+			log.Err(err).Msg(fmt.Sprintf("failed to get secret from %s (item: '%s :: %s')", session.Path(), f.ssIdentKey, f.ssIdentVal))
 			return fuse.Errno(syscall.EIO)
 		}
 
@@ -115,7 +119,22 @@ func (f *specFile) Read(ctx context.Context, req *fuse.ReadRequest, resp *fuse.R
 			return fuse.Errno(syscall.EIO)
 		}
 
-		fuseutil.HandleRead(req, resp, sec.Value)
+		value := sec.Value
+
+		if f.HasFlagBase64() {
+			stringval := string(value)
+			stringval = strings.ReplaceAll(stringval, " ", "")
+			stringval = strings.ReplaceAll(stringval, "\r", "")
+			stringval = strings.ReplaceAll(stringval, "\n", "")
+			stringval = strings.ReplaceAll(stringval, "\t", "")
+			value, err = base64.StdEncoding.DecodeString(stringval)
+			if err != nil {
+				log.Err(err).Msg(fmt.Sprintf("failed to decode secret from base64 (item: '%s :: %s')", f.ssIdentKey, f.ssIdentVal))
+				return fuse.Errno(syscall.EIO)
+			}
+		}
+
+		fuseutil.HandleRead(req, resp, value)
 		return nil
 
 	} else {
@@ -126,7 +145,22 @@ func (f *specFile) Read(ctx context.Context, req *fuse.ReadRequest, resp *fuse.R
 				return fuse.Errno(syscall.EIO)
 			}
 
-			fuseutil.HandleRead(req, resp, []byte(v))
+			value := []byte(v)
+
+			if f.HasFlagBase64() {
+				stringval := string(value)
+				stringval = strings.ReplaceAll(stringval, " ", "")
+				stringval = strings.ReplaceAll(stringval, "\r", "")
+				stringval = strings.ReplaceAll(stringval, "\n", "")
+				stringval = strings.ReplaceAll(stringval, "\t", "")
+				value, err = base64.StdEncoding.DecodeString(stringval)
+				if err != nil {
+					log.Err(err).Msg(fmt.Sprintf("failed to decode secret from base64 (item: '%s :: %s')", f.ssIdentKey, f.ssIdentVal))
+					return fuse.Errno(syscall.EIO)
+				}
+			}
+
+			fuseutil.HandleRead(req, resp, value)
 			return nil
 		} else {
 			log.Err(err).Msg(fmt.Sprintf("failed to get attribute '%s' on item '%s :: %s' (attr does not exist)", f.ssAttr, f.ssIdentKey, f.ssIdentVal))
@@ -142,4 +176,13 @@ func (f *specFile) Dirent() fuse.Dirent {
 		Type:  fuse.DT_File,
 		Name:  f.name,
 	}
+}
+
+func (f *specFile) HasFlagBase64() bool {
+	for _, flag := range f.extraFlags {
+		if strings.ToLower(flag) == "base64" {
+			return true
+		}
+	}
+	return false
 }
